@@ -1,0 +1,353 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url(img/wmremove-transformed.jpeg);
+    background-repeat: no-repeat;          
+    background-size: cover;               
+    background-position: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    perspective: 2000px;
+    position: relative;
+}
+
+.frigorifero {
+    width: 400px;
+    height: 600px;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.interno {
+    width: 400px;
+    height: 600px;
+    background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
+    border: 3px solid #333;
+    border-radius: 10px;
+    position: absolute;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3);
+}
+
+.scaffale {
+    width: 90%;
+    height: 3px;
+    background: #999;
+    margin: 0 auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.scaffale:nth-child(2) {
+    margin-top: 150px;
+}
+
+.scaffale:nth-child(3) {
+    margin-top: 145px;
+}
+
+.scaffale:nth-child(4) {
+    margin-top: 145px;
+}
+
+.luce {
+    width: 80%;
+    height: 20px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+    margin: 20px auto;
+    border-radius: 10px;
+}
+
+.anta {
+    width: 400px;
+    height: 600px;
+    background: linear-gradient(135deg, #e8e8e8 0%, #ffffff 50%, #e8e8e8 100%);
+    border: 3px solid #333;
+    border-radius: 10px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+/* Lato destro dell'anta (spessore) */
+.anta::before {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 100%;
+    background: linear-gradient(to right, #aaa 0%, #ccc 50%, #999 100%);
+    right: -15px;
+    top: 0;
+    transform-origin: left center;
+    transform: rotateY(90deg);
+    border-top: 3px solid #333;
+    border-bottom: 3px solid #333;
+    border-right: 3px solid #333;
+}
+
+/* Parte interna dell'anta */
+.anta::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #d0d0d0 0%, #e8e8e8 50%, #d0d0d0 100%);
+    border: 3px solid #333;
+    border-radius: 10px;
+    transform: translateZ(-15px);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.anta.aperta {
+    transform: rotateY(-120deg);
+}
+
+.maniglia {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 150px;
+    background: linear-gradient(to right, #666, #999, #666);
+    border-radius: 7px;
+    box-shadow:
+        -2px 0 5px rgba(0, 0, 0, 0.3),
+        inset 2px 0 3px rgba(255, 255, 255, 0.5),
+        inset -2px 0 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.maniglia:hover {
+    transform: translateY(-50%) scale(1.05);
+    background: linear-gradient(to right, #777, #aaa, #777);
+}
+
+.maniglia::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    background: inherit;
+    border-radius: 50%;
+    top: -10px;
+}
+
+.maniglia::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    background: inherit;
+    border-radius: 50%;
+    bottom: -10px;
+}
+
+.istruzioni {
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.grafico-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.1);
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    width: 900px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.grafico-container.visibile {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.grafico-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.grafico-header h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.grafico-header p {
+    color: #666;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+.chiudi-grafico {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    transition: background 0.3s;
+    z-index: 10;
+}
+
+.chiudi-grafico:hover {
+    background: #cc0000;
+}
+
+/* Responsive per tablet */
+@media (max-width: 768px) {
+    .frigorifero {
+        width: 300px;
+        height: 450px;
+    }
+
+    .interno {
+        width: 300px;
+        height: 450px;
+    }
+
+    .anta {
+        width: 300px;
+        height: 450px;
+    }
+
+    .maniglia {
+        right: 25px;
+        height: 120px;
+        width: 12px;
+    }
+
+    .grafico-container {
+        padding: 20px;
+        width: 90vw;
+    }
+
+    .grafico-header h2 {
+        font-size: 18px;
+    }
+
+    .grafico-header p {
+        font-size: 11px;
+    }
+
+    .istruzioni {
+        font-size: 16px;
+        bottom: -70px;
+    }
+    .scaffale:nth-child(1) {
+        margin-top: 40px;
+    }
+
+    .scaffale:nth-child(2) {
+        margin-top: 80px;
+    }
+
+    .scaffale:nth-child(3) {
+        margin-top: 120px;
+    }
+}
+
+/* Responsive per smartphone */
+@media (max-width: 480px) {
+    .frigorifero {
+        width: 250px;
+        height: 375px;
+    }
+
+    .interno {
+        width: 250px;
+        height: 375px;
+    }
+
+    .anta {
+        width: 250px;
+        height: 375px;
+    }
+
+    .maniglia {
+        right: 20px;
+        height: 100px;
+        width: 10px;
+    }
+
+    .grafico-container {
+        padding: 15px;
+        width: 95vw;
+    }
+
+    .grafico-header h2 {
+        font-size: 16px;
+    }
+
+    .grafico-header p {
+        font-size: 10px;
+        word-break: break-all;
+    }
+
+    .chiudi-grafico {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .istruzioni {
+        font-size: 14px;
+        bottom: -70px;
+        padding: 0 10px;
+    }
+
+    .scaffale:nth-child(1) {
+        margin-top: 40px;
+    }
+
+    .scaffale:nth-child(2) {
+        margin-top: 50px;
+    }
+
+    .scaffale:nth-child(3) {
+        margin-top: 60px;
+    }
+
+}
+
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frigorifero Interattivo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="frigorifero">
+            <div class="interno">
+                <div class="luce"></div>
+                <div class="scaffale"></div>
+                <div class="scaffale"></div>
+                <div class="scaffale"></div>
+            </div>
+            <div class="anta" id="anta">
+                <div class="maniglia" id="maniglia"></div>
+            </div>
+        </div>
+        <div class="istruzioni">Clicca sulla maniglia per aprire il frigo</div>
+    </div>
+
+    <div class="grafico-container" id="graficoContainer">
+        <button class="chiudi-grafico" id="chiudiGrafico">×</button>
+        <div class="grafico-header">
+            <h2>Consumo Energetico - Frigo Aperto</h2>
+            <p>f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³</p>
+        </div>
+        <canvas id="graficoConsumo"></canvas>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="script.js"></script>
+    
+</body>
+</html>
