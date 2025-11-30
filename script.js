@@ -122,3 +122,9 @@ chiudiGrafico.addEventListener('click', function () {
     anta.classList.remove('aperta');
     graficoContainer.classList.remove('visibile');
 });
+
+window.addEventListener('resize', () => {
+    if (aperto && graficoContainer.classList.contains('visibile')) {
+        creaGrafico();
+    }
+});

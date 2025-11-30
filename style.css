@@ -82,6 +82,7 @@ body {
     transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
     box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.5);
     cursor: pointer;
+    backface-visibility: hidden;
 }
 
 /* Lato destro dell'anta (spessore) */
@@ -186,6 +187,7 @@ body {
     pointer-events: none;
     transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 1000;
+    transform-origin: center;
 }
 
 .grafico-container.visibile {
