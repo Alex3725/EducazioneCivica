@@ -113,6 +113,9 @@ function creaGraficoRealtime() {
         graficoRealtime.destroy();
     }
 
+    // Calcola il consumo massimo a 2 ore (120 minuti)
+    const consumoMax = calcolaConsumo(120);
+
     graficoRealtime = new Chart(ctx, {
         type: 'line',
         data: {
@@ -125,7 +128,7 @@ function creaGraficoRealtime() {
                 borderWidth: 3,
                 tension: 0.4,
                 fill: true,
-                pointRadius: 3,
+                pointRadius: 0,
                 pointHoverRadius: 6
             }]
         },
@@ -157,7 +160,9 @@ function creaGraficoRealtime() {
                     },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
-                    }
+                    },
+                    min: 0,
+                    max: 7200
                 },
                 y: {
                     title: {
@@ -166,6 +171,8 @@ function creaGraficoRealtime() {
                         font: { size: 14, weight: 'bold' }
                     },
                     beginAtZero: false,
+                    min: 0.85,
+                    max: consumoMax + 0.05,
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
                     }
@@ -214,6 +221,30 @@ function resetCronometro() {
     aggiornaGraficoRealtime();
     document.getElementById('btnAvvia').textContent = 'Avvia';
     document.getElementById('btnAvvia').classList.remove('pausa');
+}
+
+function avanzaTempo() {
+    // Avanza di 10 minuti (600 secondi)
+    const secondiDaAggiungere = 600;
+    const tempoInizioAvanzamento = tempoTotale;
+    
+    // Aggiungi i punti per i 600 secondi
+    for (let i = 1; i <= secondiDaAggiungere; i++) {
+        const nuovoTempo = tempoInizioAvanzamento + i;
+        labelsRealtime.push(Math.floor(nuovoTempo));
+        datiRealtime.push(calcolaConsumo(nuovoTempo / 60));
+    }
+    
+    // Aggiorna il tempo totale
+    tempoTotale += secondiDaAggiungere;
+    
+    // Se il cronometro è attivo, aggiorna il tempo di inizio
+    if (cronometroAttivo) {
+        tempoInizio = Date.now() - (tempoTotale * 1000);
+    }
+    
+    aggiornaDisplay();
+    aggiornaGraficoRealtime();
 }
 
 function aggiornaCronometro() {
@@ -310,6 +341,7 @@ chiudiGrafico.addEventListener('click', function () {
 
 document.getElementById('btnAvvia').addEventListener('click', avviaCronometro);
 document.getElementById('btnReset').addEventListener('click', resetCronometro);
+document.getElementById('btnAvanza').addEventListener('click', avanzaTempo);
 
 window.addEventListener('resize', () => {
     if (aperto && graficoContainer.classList.contains('visibile')) {
