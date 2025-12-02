@@ -175,7 +175,6 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.1);
     background: white;
     padding: 30px;
     border-radius: 15px;
@@ -185,16 +184,19 @@ body {
     max-height: 90vh;
     overflow: auto;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: all 0.8s ease-in-out;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out, visibility 0s 0.6s;
     z-index: 1000;
-    transform-origin: center;
 }
 
 .grafico-container.visibile {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
     transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out, visibility 0s 0s;
 }
 
 .grafico-header {
@@ -233,6 +235,173 @@ body {
 
 .chiudi-grafico:hover {
     background: #cc0000;
+}
+
+/* Schede di navigazione */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.tab-button:hover {
+    color: #333;
+    background: #f5f5f5;
+}
+
+.tab-button.active {
+    color: #ff4444;
+    border-bottom-color: #ff4444;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Cronometro */
+.cronometro-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.tempo-display {
+    font-size: 72px;
+    font-weight: bold;
+    color: #333;
+    font-family: 'Courier New', monospace;
+    margin: 20px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-tempo {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.controlli-cronometro {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.btn-cronometro {
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-avvia {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-avvia:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-avvia.pausa {
+    background: #FF9800;
+}
+
+.btn-avvia.pausa:hover {
+    background: #e68900;
+}
+
+.btn-reset {
+    background: #f44336;
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #da190b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.consumo-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+    margin-top: 20px;
+}
+
+.consumo-label {
+    font-size: 16px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.consumo-valore {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.consumo-info {
+    font-size: 12px;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+.grafico-realtime-wrapper {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.home-back {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    z-index: 9999;
+    text-decoration: none;
+    transition: transform 150ms ease, background 150ms ease;
+}
+.home-back svg { display: block; }
+.home-back:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
+.home-back:focus { outline: 2px solid rgba(255,255,255,0.16); outline-offset: 2px; }
+
+@media (max-width:480px) {
+    .home-back { width: 40px; height: 40px; top: 10px; left: 10px; border-radius: 8px; }
+    .home-back svg { width: 18px; height: 18px; }
 }
 
 /* Responsive per tablet */
@@ -275,6 +444,7 @@ body {
         font-size: 16px;
         bottom: -70px;
     }
+    
     .scaffale:nth-child(1) {
         margin-top: 40px;
     }
@@ -285,6 +455,24 @@ body {
 
     .scaffale:nth-child(3) {
         margin-top: 120px;
+    }
+
+    .tab-button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .tempo-display {
+        font-size: 56px;
+    }
+
+    .btn-cronometro {
+        padding: 12px 30px;
+        font-size: 16px;
+    }
+
+    .consumo-valore {
+        font-size: 28px;
     }
 }
 
@@ -351,6 +539,34 @@ body {
         margin-top: 60px;
     }
 
-}
+    .tabs {
+        gap: 5px;
+    }
 
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .tempo-display {
+        font-size: 48px;
+    }
+
+    .btn-cronometro {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .consumo-valore {
+        font-size: 24px;
+    }
+
+    .consumo-label {
+        font-size: 14px;
+    }
+
+    .consumo-info {
+        font-size: 10px;
+    }
+}
 
