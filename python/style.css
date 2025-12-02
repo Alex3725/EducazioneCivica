@@ -1,3 +1,87 @@
+/* ---- Reset ---- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../../img/wmremove-transformed.jpeg');
+    background-repeat: no-repeat;          
+    background-size: cover;               
+    background-position: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    perspective: 2000px;
+    position: relative;
+}
+
+.frigorifero {
+    width: 400px;
+    height: 600px;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.interno {
+    width: 400px;
+    height: 600px;
+    background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
+    border: 3px solid #333;
+    border-radius: 10px;
+    position: absolute;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3);
+    transform: translateZ(-1px);
+}
+
+.scaffale {
+    width: 90%;
+    height: 3px;
+    background: #999;
+    margin: 0 auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.scaffale:nth-child(2) {
+    margin-top: 150px;
+}
+
+.scaffale:nth-child(3) {
+    margin-top: 145px;
+}
+
+.scaffale:nth-child(4) {
+    margin-top: 145px;
+}
+
+.luce {
+    width: 80%;
+    height: 20px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+    margin: 20px auto;
+    border-radius: 10px;
+}
+
+.anta {
+    width: 400px;
+    height: 600px;
+    background: linear-gradient(135deg, #e8e8e8 0%, #ffffff 50%, #e8e8e8 100%);
+    border: 3px solid #333;
+    border-radius: 10px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    backface-visibility: hidden;
+}
 * {
     margin: 0;
     padding: 0;

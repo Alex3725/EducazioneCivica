@@ -1,0 +1,158 @@
+/* ---- Reset ---- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #fff;
+    overflow: hidden;
+    /* Use project background: image with a subtle dark overlay to keep content readable */
+    background: linear-gradient(rgba(7,16,28,0.45), rgba(2,6,23,0.45)), url('../img/wmremove-transformed.jpeg') center/cover no-repeat fixed;
+    background-attachment: fixed;
+}
+
+/* Full-screen canvas for snow */
+.snow-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 0; /* behind content */
+  pointer-events: none;
+}
+
+/* Hero */
+.home-hero {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.hero-card {
+  position: relative;
+    z-index: 3; /* above canvas */
+  width: min(1000px, 90vw);
+  padding: 48px 36px;
+  border-radius: 16px;
+    /* slightly darker/frosted background for better contrast */
+    background: linear-gradient(180deg, rgba(10,14,20,0.62), rgba(10,14,20,0.52));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 40px rgba(2,6,23,0.6);
+  backdrop-filter: blur(6px) saturate(120%);
+  text-align: center;
+}
+
+.hero-title {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+    color: #fff;
+    text-shadow: 0 6px 20px rgba(0,0,0,0.55);
+}
+
+.hero-sub {
+    color: rgba(255,255,255,0.95);
+  font-size: clamp(12px, 1.6vw, 18px);
+  margin-bottom: 24px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin: 12px 0 22px 0;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.09);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35), inset 0 -2px 6px rgba(255,255,255,0.02);
+}
+
+.hero-btn:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.55); }
+.hero-btn.ghost {
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.14);
+}
+
+.hero-controls {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: white;
+  cursor: pointer;
+}
+
+input[type=range] { width: 180px; }
+
+.home-footer { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; z-index: 4; color: rgba(255,255,255,0.55); }
+/* Top-left home back arrow */
+.home-back {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 6; /* above hero */
+  text-decoration: none;
+  transition: transform 150ms ease, background 150ms ease;
+}
+.home-back svg { display: block; }
+.home-back:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
+.home-back:focus { outline: 2px solid rgba(255,255,255,0.16); outline-offset: 2px; }
+
+@media (max-width:480px) {
+  .home-back { width: 40px; height: 40px; top: 10px; left: 10px; border-radius: 8px; }
+  .home-back svg { width: 18px; height: 18px; }
+}
+
+
+/* Responsive adjustments */
+@media (max-width:720px) {
+  .hero-card { padding: 28px 20px; }
+  .hero-buttons { gap: 12px; }
+}
+
+/* Extra subtle snowflake graphic (css fallback) */
+/* snow fallback removed */
+
+/* Accessibility focus states */
+.hero-btn:focus, .control-btn:focus { outline: 2px solid rgba(255,255,255,0.18); outline-offset: 2px; }
+ 
+
+

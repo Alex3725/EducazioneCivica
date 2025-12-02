@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analisi Python - Frigo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="../../index.html" class="home-back" aria-label="Vai alla Home" title="Home">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+
+  <div class="container">
+    <header class="hero-card">
+      <h1>Analisi Python</h1>
+      <p>I dati vengono calcolati dal server Python (Flask) e restituiti come JSON.</p>
+      <div style="margin: 12px 0;">
+        <button id="loadBtn" class="hero-btn">Carica grafico (API Python)</button>
+        <button id="fallbackBtn" class="hero-btn ghost">Fallback JSON</button>
+      </div>
+    </header>
+    <main style="display:flex;justify-content:center;padding:24px;">
+      <div style="width:min(900px,90vw);">
+        <canvas id="chartPy"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frigorifero Interattivo</title>
+  <link rel="stylesheet" href="../../style.css">
+    <link rel="icon" href="img/refrigerator_icon_161230.svg" type="svg">
+</head>
+<body>
+    <a href="home/index.html" class="home-back" aria-label="Vai alla Home" title="Home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </a>
+ 
+
+    <div class="container">
+        <div class="frigorifero">
+            <div class="interno">
+                <div class="frigorifero">
+                  <div class="interno">
+                    <div class="luce"></div>
+                    <div class="scaffale"></div>
+                    <div class="scaffale"></div>
+                    <div class="scaffale"></div>
+                  </div>
+                  <div class="anta" id="anta">
+                    <div class="maniglia" id="maniglia"></div>
+                  </div>
+                </div>
+                <div class="istruzioni">Clicca sulla maniglia per aprire il frigo</div>
+              </div>
+
+              <div class="grafico-container" id="graficoContainer">
+                <button class="chiudi-grafico" id="chiudiGrafico">×</button>
+                <div class="tabs">
+                  <button class="tab-button active" data-tab="teorico">Grafico Teorico</button>
+                  <button class="tab-button" data-tab="realtime">Consumo in Tempo Reale</button>
+                </div>
+                <div id="teorico" class="tab-content active">
+                  <div class="grafico-header">
+                    <h2>Consumo Energetico - Frigo Aperto</h2>
+                    <p>f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³</p>
+                    <button id="btnAnalisiPython" class="control-btn" style="margin-left:12px;">Analisi Python</button>
+                  </div>
+                  <canvas id="graficoConsumo"></canvas>
+                </div>
+                <div id="realtime" class="tab-content">
+                  <div class="grafico-header">
+                    <h2>Misurazione Consumo in Tempo Reale</h2>
+                    <p>Cronometra quanto tempo rimane aperto il frigo</p>
+                  </div>
+                  <div class="cronometro-container">
+                    <div class="tempo-display" id="tempoDisplay">00:00.0</div>
+                    <div class="info-tempo">Tempo totale (minuti:secondi)</div>
+                    <div class="controlli-cronometro">
+                      <button class="btn-cronometro btn-avvia" id="btnAvvia">Avvia</button>
+                      <button class="btn-cronometro btn-reset" id="btnReset">Reset</button>
+                    </div>
+                    <div class="consumo-display">
+                      <div class="consumo-label">Consumo energetico stimato:</div>
+                      <div class="consumo-valore">
+                        <span id="consumoRealtime">0.9000</span> kWh/giorno
+                      </div>
+                      <div class="consumo-info">Basato sulla formula: f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³</div>
+                    </div>
+                    <div class="grafico-realtime-wrapper">
+                      <canvas id="graficoRealtime"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        <button class="chiudi-grafico" id="chiudiGrafico">×</button>
+        
+        <!-- Schede di navigazione -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="teorico">Grafico Teorico</button>
+            <button class="tab-button" data-tab="realtime">Consumo in Tempo Reale</button>
+        </div>
+
+        <!-- Contenuto scheda teorico -->
+        <div id="teorico" class="tab-content active">
+            <div class="grafico-header">
+                <h2>Consumo Energetico - Frigo Aperto</h2>
+                <p>f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³</p>
+                <button id="btnAnalisiPython" class="control-btn" style="margin-left:12px;">Analisi Python</button>
+            </div>
+            <canvas id="graficoConsumo"></canvas>
+        </div>
+
+        <!-- Contenuto scheda realtime -->
+        <div id="realtime" class="tab-content">
+            <div class="grafico-header">
+                <h2>Misurazione Consumo in Tempo Reale</h2>
+                <p>Cronometra quanto tempo rimane aperto il frigo</p>
+            </div>
+            
+            <div class="cronometro-container">
+                <div class="tempo-display" id="tempoDisplay">00:00.0</div>
+                <div class="info-tempo">Tempo totale (minuti:secondi)</div>
+                
+                <div class="controlli-cronometro">
+                    <button class="btn-cronometro btn-avvia" id="btnAvvia">Avvia</button>
+                    <button class="btn-cronometro btn-reset" id="btnReset">Reset</button>
+                </div>
+                
+                <div class="consumo-display">
+                    <div class="consumo-label">Consumo energetico stimato:</div>
+                    <div class="consumo-valore">
+                        <span id="consumoRealtime">0.9000</span> kWh/giorno
+                    </div>
+                    <div class="consumo-info">Basato sulla formula: f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³</div>
+                </div>
+
+                <div class="grafico-realtime-wrapper">
+                    <canvas id="graficoRealtime"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
