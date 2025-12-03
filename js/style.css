@@ -33,8 +33,8 @@ body {
 .interno {
     width: 400px;
     height: 600px;
-    background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
-    border: 3px solid #333;
+    background: linear-gradient(to bottom, #f7fbff 0%, #eef6ff 100%);
+    border: 3px solid #1b4b6a; /* slightly bluer border */
     border-radius: 10px;
     position: absolute;
     box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3);
@@ -72,8 +72,8 @@ body {
 .anta {
     width: 400px;
     height: 600px;
-    background: linear-gradient(135deg, #e8e8e8 0%, #ffffff 50%, #e8e8e8 100%);
-    border: 3px solid #333;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 50%, #ffffff 100%);
+    border: 3px solid #1b4b6a;
     border-radius: 10px;
     position: absolute;
     left: 0;
@@ -126,7 +126,7 @@ body {
     transform: translateY(-50%);
     width: 15px;
     height: 150px;
-    background: linear-gradient(to right, #666, #999, #666);
+    background: linear-gradient(to right, #1b4b6a, #69a7e0, #1b4b6a);
     border-radius: 7px;
     box-shadow:
         -2px 0 5px rgba(0, 0, 0, 0.3),
@@ -136,10 +136,7 @@ body {
     transition: transform 0.2s;
 }
 
-.maniglia:hover {
-    transform: translateY(-50%) scale(1.05);
-    background: linear-gradient(to right, #777, #aaa, #777);
-}
+.maniglia:hover { transform: translateY(-50%) scale(1.05); background: linear-gradient(to right, #2a6b8f, #a9ddff, #2a6b8f); }
 
 .maniglia::before {
     content: '';
@@ -171,25 +168,7 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.grafico-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
-    width: 900px;
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: auto;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translate(-50%, -50%) scale(0.95);
-    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out, visibility 0s 0.6s;
-    z-index: 1000;
-}
+.grafico-container { position: fixed; top: 50%; left: 50%; background: linear-gradient(180deg, #072033 0%, #0b2b3a 100%); color: #eef6ff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 50px rgba(0,0,0,0.6); width: 900px; max-width: 90vw; max-height: 90vh; overflow: auto; opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, -50%) scale(0.95); transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out, visibility 0s 0.6s; z-index: 1000; }
 
 .grafico-container.visibile {
     opacity: 1;
@@ -204,17 +183,8 @@ body {
     margin-bottom: 20px;
 }
 
-.grafico-header h2 {
-    color: #333;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.grafico-header p {
-    color: #666;
-    font-size: 14px;
-    font-family: monospace;
-}
+.grafico-header h2 { color: #ffd43b; font-size: 24px; margin-bottom: 10px; }
+.grafico-header p { color: #cfe6ff; font-size: 14px; font-family: monospace; }
 
 .chiudi-grafico {
     position: absolute;
@@ -355,13 +325,7 @@ body {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-.consumo-display {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 25px;
-    border-radius: 12px;
-    color: white;
-    margin-top: 20px;
-}
+.consumo-display { background: linear-gradient(90deg, #183b56 0%, #ffd43b 100%); padding: 25px; border-radius: 12px; color: #072033; margin-top: 20px; }
 
 .consumo-label {
     font-size: 16px;

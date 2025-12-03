@@ -20,7 +20,8 @@ function calcolaConsumo(x) {
 }
 
 // Genera dati per il grafico teorico
-function generaDatiGrafico() {
+// Local generator kept as fallback
+function generaDatiGraficoLocal() {
     const dati = [];
     const labels = [];
     let incremento = 3;
@@ -34,18 +35,44 @@ function generaDatiGrafico() {
         labels.push(x);
         dati.push(calcolaConsumo(x));
     }
-    return { labels, dati };
+    return { labels, dati, incremento };
+}
+
+// Fetch theoretical data from Python API, fallback to static JSON or local generator
+async function generaDatiGrafico() {
+    const local = generaDatiGraficoLocal();
+    const increment = local.incremento || 3;
+    const apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${increment}`;
+
+    try {
+        const res = await fetch(apiUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error('API non disponibile');
+        const payload = await res.json();
+        if (payload && Array.isArray(payload.labels) && Array.isArray(payload.dati)) {
+            return { labels: payload.labels, dati: payload.dati };
+        }
+        throw new Error('Formato API non valido');
+    } catch (err) {
+        try {
+            const fallback = await fetch('/Api/consumo_api.json');
+            if (!fallback.ok) throw new Error('fallback non trovato');
+            const data = await fallback.json();
+            if (data && Array.isArray(data.labels) && Array.isArray(data.dati)) {
+                return { labels: data.labels, dati: data.dati };
+            }
+        } catch (e) {
+            return { labels: local.labels, dati: local.dati };
+        }
+        return { labels: local.labels, dati: local.dati };
+    }
 }
 
 // Crea il grafico teorico
-// optionally pass data: { labels: [], dati: [] }
-function creaGrafico(apiData = null) {
+async function creaGrafico() {
     const ctx = document.getElementById('graficoConsumo').getContext('2d');
-    const { labels, dati } = apiData ? apiData : generaDatiGrafico();
+    const { labels, dati } = await generaDatiGrafico();
 
-    if (grafico) {
-        grafico.destroy();
-    }
+    if (grafico) grafico.destroy();
 
     grafico = new Chart(ctx, {
         type: 'line',
@@ -114,6 +141,9 @@ function creaGraficoRealtime() {
         graficoRealtime.destroy();
     }
 
+    // Calcola il consumo massimo a 2 ore (120 minuti)
+    const consumoMax = calcolaConsumo(120);
+
     graficoRealtime = new Chart(ctx, {
         type: 'line',
         data: {
@@ -126,7 +156,7 @@ function creaGraficoRealtime() {
                 borderWidth: 3,
                 tension: 0.4,
                 fill: true,
-                pointRadius: 3,
+                pointRadius: 0,
                 pointHoverRadius: 6
             }]
         },
@@ -158,7 +188,9 @@ function creaGraficoRealtime() {
                     },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
-                    }
+                    },
+                    min: 0,
+                    max: 7200
                 },
                 y: {
                     title: {
@@ -167,6 +199,8 @@ function creaGraficoRealtime() {
                         font: { size: 14, weight: 'bold' }
                     },
                     beginAtZero: false,
+                    min: 0.85,
+                    max: consumoMax + 0.05,
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
                     }
@@ -174,46 +208,6 @@ function creaGraficoRealtime() {
             }
         }
     });
-}
-
-// Load data from API and show chart using API data
-async function loadApiData() {
-    const btn = document.getElementById('btnAnalisiPython');
-    try {
-        if (btn) { btn.disabled = true; btn.textContent = 'Caricamento...'; }
-        // Prefer to call the local Python API if available.
-        const defaultIncrement = (window.innerWidth <= 480) ? 9 : (window.innerWidth <= 768 ? 6 : 3);
-        let apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${defaultIncrement}`;
-        let res = null;
-        try {
-            res = await fetch(apiUrl, { cache: 'no-cache' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-        } catch (err) {
-            // fallback to packaged static JSON
-            res = await fetch('/Api/consumo_api.json');
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-        }
-        const json = await res.json();
-
-        // Open grafico container if closed and ensure 'teorico' tab is active
-        graficoContainer.style.display = 'block';
-        void graficoContainer.offsetHeight;
-        graficoContainer.classList.add('visibile');
-        // switch to theorico tab
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        const theoricoBtn = document.querySelector('.tab-button[data-tab="teorico"]');
-        const theoricoContent = document.getElementById('teorico');
-        if (theoricoBtn) theoricoBtn.classList.add('active');
-        if (theoricoContent) theoricoContent.classList.add('active');
-        // create grafico with api data
-        creaGrafico({ labels: json.labels, dati: json.dati });
-    } catch (err) {
-        console.error('Errore fetch API:', err);
-        alert('Errore caricando i dati dall\'API: ' + (err.message || err));
-    } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Analisi Python'; }
-    }
 }
 
 // Aggiorna il grafico realtime
@@ -255,6 +249,30 @@ function resetCronometro() {
     aggiornaGraficoRealtime();
     document.getElementById('btnAvvia').textContent = 'Avvia';
     document.getElementById('btnAvvia').classList.remove('pausa');
+}
+
+function avanzaTempo() {
+    // Avanza di 10 minuti (600 secondi)
+    const secondiDaAggiungere = 600;
+    const tempoInizioAvanzamento = tempoTotale;
+    
+    // Aggiungi i punti per i 600 secondi
+    for (let i = 1; i <= secondiDaAggiungere; i++) {
+        const nuovoTempo = tempoInizioAvanzamento + i;
+        labelsRealtime.push(Math.floor(nuovoTempo));
+        datiRealtime.push(calcolaConsumo(nuovoTempo / 60));
+    }
+    
+    // Aggiorna il tempo totale
+    tempoTotale += secondiDaAggiungere;
+    
+    // Se il cronometro è attivo, aggiorna il tempo di inizio
+    if (cronometroAttivo) {
+        tempoInizio = Date.now() - (tempoTotale * 1000);
+    }
+    
+    aggiornaDisplay();
+    aggiornaGraficoRealtime();
 }
 
 function aggiornaCronometro() {
@@ -351,6 +369,7 @@ chiudiGrafico.addEventListener('click', function () {
 
 document.getElementById('btnAvvia').addEventListener('click', avviaCronometro);
 document.getElementById('btnReset').addEventListener('click', resetCronometro);
+document.getElementById('btnAvanza').addEventListener('click', avanzaTempo);
 
 window.addEventListener('resize', () => {
     if (aperto && graficoContainer.classList.contains('visibile')) {
@@ -368,17 +387,4 @@ window.addEventListener('load', () => {
     void graficoContainer.offsetHeight;
     graficoContainer.style.display = '';
     aggiornaDisplay();
-    // Bind ANALISI button
-    const btnApi = document.getElementById('btnAnalisiPython');
-    if (btnApi) btnApi.addEventListener('click', loadApiData);
-
-    // If opened with ?source=api, automatically fetch API data and show chart
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('source') === 'api') {
-        // open grafico container
-        graficoContainer.style.display = 'block';
-        void graficoContainer.offsetHeight;
-        graficoContainer.classList.add('visibile');
-        loadApiData();
-    }
 });

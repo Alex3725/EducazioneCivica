@@ -36,11 +36,24 @@ def consumo_api():
     dati = []
     x = 0.0
     while x <= max_x + 1e-9:
-        labels.append(round(x, 3))
-        dati.append(round(calcola_consumo(x), 6))
+        
+        if float(x).is_integer():
+            labels.append(int(round(x)))
+        else:
+            labels.append(round(x, 3))
+
+       
+        dati.append(round(calcola_consumo(x), 4))
         x += increment
 
-    return jsonify({ 'labels': labels, 'dati': dati })
+    meta = {
+        'formula': '0.90 + 0.006x + 0.00012x^2 - 0.000001x^3',
+        'unit': 'kWh',
+        'max': max_x,
+        'increment': increment
+    }
+
+    return jsonify({ 'labels': labels, 'dati': dati, 'meta': meta })
 
 
 if __name__ == '__main__':
