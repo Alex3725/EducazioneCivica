@@ -20,7 +20,8 @@ function calcolaConsumo(x) {
 }
 
 // Genera dati per il grafico teorico
-function generaDatiGrafico() {
+// Local generator kept as fallback
+function generaDatiGraficoLocal() {
     const dati = [];
     const labels = [];
     let incremento = 3;
@@ -34,17 +35,44 @@ function generaDatiGrafico() {
         labels.push(x);
         dati.push(calcolaConsumo(x));
     }
-    return { labels, dati };
+    return { labels, dati, incremento };
+}
+
+// Fetch theoretical data from Python API, fallback to static JSON or local generator
+async function generaDatiGrafico() {
+    const local = generaDatiGraficoLocal();
+    const increment = local.incremento || 3;
+    const apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${increment}`;
+
+    try {
+        const res = await fetch(apiUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error('API non disponibile');
+        const payload = await res.json();
+        if (payload && Array.isArray(payload.labels) && Array.isArray(payload.dati)) {
+            return { labels: payload.labels, dati: payload.dati };
+        }
+        throw new Error('Formato API non valido');
+    } catch (err) {
+        try {
+            const fallback = await fetch('/Api/consumo_api.json');
+            if (!fallback.ok) throw new Error('fallback non trovato');
+            const data = await fallback.json();
+            if (data && Array.isArray(data.labels) && Array.isArray(data.dati)) {
+                return { labels: data.labels, dati: data.dati };
+            }
+        } catch (e) {
+            return { labels: local.labels, dati: local.dati };
+        }
+        return { labels: local.labels, dati: local.dati };
+    }
 }
 
 // Crea il grafico teorico
-function creaGrafico() {
+async function creaGrafico() {
     const ctx = document.getElementById('graficoConsumo').getContext('2d');
-    const { labels, dati } = generaDatiGrafico();
+    const { labels, dati } = await generaDatiGrafico();
 
-    if (grafico) {
-        grafico.destroy();
-    }
+    if (grafico) grafico.destroy();
 
     grafico = new Chart(ctx, {
         type: 'line',
