@@ -14,16 +14,21 @@ let intervalloTimer = null;
 let datiRealtime = [];
 let labelsRealtime = [];
 
+// LIMITE MASSIMO: 90 minuti = 5400 secondi
+const LIMITE_SECONDI = 5400;
+const LIMITE_MINUTI = 90;
+
 // Funzione di consumo: f(x) = 0,90 + 0,006x + 0,00012x² − 0,000001x³
 function calcolaConsumo(x) {
+    // Blocca il calcolo a 90 minuti massimo
+    if (x > LIMITE_MINUTI) {
+        x = LIMITE_MINUTI;
+    }
     return 0.90 + 0.006 * x + 0.00012 * Math.pow(x, 2) - 0.000001 * Math.pow(x, 3);
 }
 
-// Genera dati per il grafico teorico
-// Local generator kept as fallback
-function generaDatiGraficoLocal() {
-    const dati = [];
-    const labels = [];
+// Fetch data SOLO da Python API o JSON fallback (NO calcolo locale JS)
+async function generaDatiGrafico() {
     let incremento = 3;
     if (window.innerWidth <= 480) {
         incremento = 9;
@@ -31,39 +36,34 @@ function generaDatiGraficoLocal() {
         incremento = 6;
     }
 
-    for (let x = 0; x <= 90; x += incremento) {
-        labels.push(x);
-        dati.push(calcolaConsumo(x));
-    }
-    return { labels, dati, incremento };
-}
-
-// Fetch theoretical data from Python API, fallback to static JSON or local generator
-async function generaDatiGrafico() {
-    const local = generaDatiGraficoLocal();
-    const increment = local.incremento || 3;
-    const apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${increment}`;
+    const apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${incremento}`;
 
     try {
+        // Prova prima l'API Python
         const res = await fetch(apiUrl, { cache: 'no-store' });
         if (!res.ok) throw new Error('API non disponibile');
         const payload = await res.json();
         if (payload && Array.isArray(payload.labels) && Array.isArray(payload.dati)) {
+            console.log('✓ Dati caricati da API Python');
             return { labels: payload.labels, dati: payload.dati };
         }
         throw new Error('Formato API non valido');
     } catch (err) {
+        console.warn('⚠ API Python non disponibile, uso JSON fallback');
+        // Fallback al JSON statico
         try {
             const fallback = await fetch('/Api/consumo_api.json');
-            if (!fallback.ok) throw new Error('fallback non trovato');
+            if (!fallback.ok) throw new Error('JSON fallback non trovato');
             const data = await fallback.json();
             if (data && Array.isArray(data.labels) && Array.isArray(data.dati)) {
+                console.log('✓ Dati caricati da JSON fallback');
                 return { labels: data.labels, dati: data.dati };
             }
         } catch (e) {
-            return { labels: local.labels, dati: local.dati };
+            console.error('❌ Errore caricamento dati:', e);
+            alert('Errore: Impossibile caricare i dati. Assicurati che l\'API Python sia attiva o che il file JSON esista.');
+            return { labels: [0, 90], dati: [0.9, 1.683] }; // Dati minimi di emergenza
         }
-        return { labels: local.labels, dati: local.dati };
     }
 }
 
@@ -141,8 +141,7 @@ function creaGraficoRealtime() {
         graficoRealtime.destroy();
     }
 
-    // Calcola il consumo massimo a 2 ore (120 minuti)
-    const consumoMax = calcolaConsumo(120);
+    const consumoMax = calcolaConsumo(LIMITE_MINUTI);
 
     graficoRealtime = new Chart(ctx, {
         type: 'line',
@@ -190,7 +189,7 @@ function creaGraficoRealtime() {
                         color: 'rgba(0, 0, 0, 0.05)'
                     },
                     min: 0,
-                    max: 7200
+                    max: LIMITE_SECONDI
                 },
                 y: {
                     title: {
@@ -210,7 +209,6 @@ function creaGraficoRealtime() {
     });
 }
 
-// Aggiorna il grafico realtime
 function aggiornaGraficoRealtime() {
     if (graficoRealtime) {
         graficoRealtime.data.labels = labelsRealtime;
@@ -219,8 +217,12 @@ function aggiornaGraficoRealtime() {
     }
 }
 
-// Funzioni per il cronometro
 function avviaCronometro() {
+    if (tempoTotale >= LIMITE_SECONDI) {
+        alert(`Limite massimo raggiunto: ${LIMITE_MINUTI} minuti`);
+        return;
+    }
+
     if (!cronometroAttivo) {
         cronometroAttivo = true;
         tempoInizio = Date.now() - (tempoTotale * 1000);
@@ -252,23 +254,31 @@ function resetCronometro() {
 }
 
 function avanzaTempo() {
-    // Avanza di 10 minuti (600 secondi)
-    const secondiDaAggiungere = 600;
+    const tempoRimanente = LIMITE_SECONDI - tempoTotale;
+    
+    if (tempoRimanente <= 0) {
+        alert(`Limite massimo raggiunto: ${LIMITE_MINUTI} minuti`);
+        return;
+    }
+
+    const secondiDaAggiungere = Math.min(600, tempoRimanente);
     const tempoInizioAvanzamento = tempoTotale;
     
-    // Aggiungi i punti per i 600 secondi
     for (let i = 1; i <= secondiDaAggiungere; i++) {
         const nuovoTempo = tempoInizioAvanzamento + i;
         labelsRealtime.push(Math.floor(nuovoTempo));
         datiRealtime.push(calcolaConsumo(nuovoTempo / 60));
     }
     
-    // Aggiorna il tempo totale
     tempoTotale += secondiDaAggiungere;
     
-    // Se il cronometro è attivo, aggiorna il tempo di inizio
     if (cronometroAttivo) {
         tempoInizio = Date.now() - (tempoTotale * 1000);
+    }
+    
+    if (tempoTotale >= LIMITE_SECONDI) {
+        pausaCronometro();
+        alert(`Limite massimo raggiunto: ${LIMITE_MINUTI} minuti`);
     }
     
     aggiornaDisplay();
@@ -277,10 +287,16 @@ function avanzaTempo() {
 
 function aggiornaCronometro() {
     tempoTotale = (Date.now() - tempoInizio) / 1000;
+    
+    if (tempoTotale >= LIMITE_SECONDI) {
+        tempoTotale = LIMITE_SECONDI;
+        pausaCronometro();
+        alert(`Limite massimo raggiunto: ${LIMITE_MINUTI} minuti`);
+    }
+    
     aggiornaDisplay();
     
-    // Aggiungi punto al grafico ogni secondo
-    if (Math.floor(tempoTotale) !== labelsRealtime.length) {
+    if (Math.floor(tempoTotale) !== labelsRealtime.length && tempoTotale < LIMITE_SECONDI) {
         labelsRealtime.push(Math.floor(tempoTotale));
         datiRealtime.push(calcolaConsumo(tempoTotale / 60));
         aggiornaGraficoRealtime();
@@ -297,6 +313,12 @@ function aggiornaDisplay() {
     
     const consumo = calcolaConsumo(tempoTotale / 60);
     document.getElementById('consumoRealtime').textContent = consumo.toFixed(4);
+    
+    if (tempoTotale >= LIMITE_SECONDI * 0.95) {
+        document.getElementById('tempoDisplay').style.color = '#ff4444';
+    } else {
+        document.getElementById('tempoDisplay').style.color = '#333';
+    }
 }
 
 function toggleFrigo() {
@@ -308,7 +330,6 @@ function toggleFrigo() {
             void graficoContainer.offsetHeight;
             graficoContainer.classList.add('visibile');
             
-            // Mostra il grafico teorico di default
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab && activeTab.dataset.tab === 'teorico') {
                 creaGrafico();
@@ -320,27 +341,22 @@ function toggleFrigo() {
         anta.classList.remove('aperta');
         graficoContainer.classList.remove('visibile');
         
-        // Pausa il cronometro quando si chiude
         if (cronometroAttivo) {
             pausaCronometro();
         }
     }
 }
 
-// Gestione delle schede
 tabButtons.forEach(button => {
     button.addEventListener('click', () => {
         const tabName = button.dataset.tab;
         
-        // Rimuovi classe active da tutti i bottoni e contenuti
         tabButtons.forEach(btn => btn.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
         
-        // Aggiungi classe active al bottone e contenuto selezionato
         button.classList.add('active');
         document.getElementById(tabName).classList.add('active');
         
-        // Crea il grafico appropriato
         if (tabName === 'teorico') {
             setTimeout(() => creaGrafico(), 100);
         } else if (tabName === 'realtime') {
@@ -349,7 +365,6 @@ tabButtons.forEach(button => {
     });
 });
 
-// Event listeners
 maniglia.addEventListener('click', function (e) {
     e.stopPropagation();
     toggleFrigo();
