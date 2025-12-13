@@ -516,7 +516,7 @@ body {
     .consumo-info {
         font-size: 10px;
     }
-     
+}
 /* Top-left home back arrow (root page) */
 .home-back {
     position: fixed;
@@ -545,4 +545,3 @@ body {
     .home-back svg { width: 18px; height: 18px; }
 }
  
-}
