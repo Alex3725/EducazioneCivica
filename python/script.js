@@ -27,7 +27,7 @@ function calcolaConsumo(x) {
     return 0.90 + 0.006 * x + 0.00012 * Math.pow(x, 2) - 0.000001 * Math.pow(x, 3);
 }
 
-// Fetch data SOLO da Python API o JSON fallback (NO calcolo locale JS)
+// Fetch data SOLO da Python API (NO JSON fallback)
 async function generaDatiGrafico() {
     let incremento = 3;
     if (window.innerWidth <= 480) {
@@ -39,9 +39,10 @@ async function generaDatiGrafico() {
     const apiUrl = `http://127.0.0.1:5000/api/consumo?max=90&increment=${incremento}`;
 
     try {
-        // Prova prima l'API Python
         const res = await fetch(apiUrl, { cache: 'no-store' });
-        if (!res.ok) throw new Error('API non disponibile');
+        if (!res.ok) {
+            throw new Error(`Errore API: ${res.status} ${res.statusText}`);
+        }
         const payload = await res.json();
         if (payload && Array.isArray(payload.labels) && Array.isArray(payload.dati)) {
             console.log('✓ Dati caricati da API Python');
@@ -49,88 +50,82 @@ async function generaDatiGrafico() {
         }
         throw new Error('Formato API non valido');
     } catch (err) {
-        console.warn('⚠ API Python non disponibile, uso JSON fallback');
-        // Fallback al JSON statico
-        try {
-            const fallback = await fetch('/Api/consumo_api.json');
-            if (!fallback.ok) throw new Error('JSON fallback non trovato');
-            const data = await fallback.json();
-            if (data && Array.isArray(data.labels) && Array.isArray(data.dati)) {
-                console.log('✓ Dati caricati da JSON fallback');
-                return { labels: data.labels, dati: data.dati };
-            }
-        } catch (e) {
-            console.error('❌ Errore caricamento dati:', e);
-            alert('Errore: Impossibile caricare i dati. Assicurati che l\'API Python sia attiva o che il file JSON esista.');
-            return { labels: [0, 90], dati: [0.9, 1.683] }; // Dati minimi di emergenza
-        }
+        console.error('❌ Errore caricamento dati dall\'API Python:', err);
+        alert('Errore: Impossibile connettersi all\'API Python.\n\nAssicurati che il server Flask sia attivo su http://127.0.0.1:5000\n\nPer avviarlo:\n1. Apri PowerShell nella cartella Api/\n2. Attiva l\'ambiente virtuale: .\\.venv\\Scripts\\Activate.ps1\n3. Avvia il server: python analaisData.py');
+        throw err; // Rilancia l'errore per impedire la creazione del grafico
     }
 }
 
 // Crea il grafico teorico
 async function creaGrafico() {
     const ctx = document.getElementById('graficoConsumo').getContext('2d');
-    const { labels, dati } = await generaDatiGrafico();
+    
+    try {
+        const { labels, dati } = await generaDatiGrafico();
 
-    if (grafico) grafico.destroy();
+        if (grafico) grafico.destroy();
 
-    grafico = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Consumo energetico (kWh/giorno)',
-                data: dati,
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 0,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
+        grafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consumo energetico (kWh/giorno)',
+                    data: dati,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Consumo: ${context.parsed.y.toFixed(3)} kWh/giorno`;
+                            }
+                        }
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return `Consumo: ${context.parsed.y.toFixed(3)} kWh/giorno`;
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Minuti totali di porta aperta al giorno',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Consumo Energetico (kWh/giorno)',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     }
                 }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Minuti totali di porta aperta al giorno',
-                        font: { size: 14, weight: 'bold' }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Consumo Energetico (kWh/giorno)',
-                        font: { size: 14, weight: 'bold' }
-                    },
-                    beginAtZero: false,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                }
             }
-        }
-    });
+        });
+    } catch (err) {
+        // Errore già gestito nella funzione generaDatiGrafico
+        console.error('Impossibile creare il grafico:', err);
+    }
 }
 
 // Crea il grafico realtime
